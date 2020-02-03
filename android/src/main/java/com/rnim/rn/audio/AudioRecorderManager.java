@@ -39,6 +39,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.IllegalAccessException;
 import java.lang.NoSuchMethodException;
+import java.lang.Math;
 
 class AudioRecorderManager extends ReactContextBaseJavaModule {
 
@@ -319,8 +320,10 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
           body.putDouble("currentTime", stopWatch.getTimeSeconds());
 
           if (isMeteringEnabled) {
-            int currentPeakMetering = recorder.getMaxAmplitude();
-            body.putInt("currentPeakMetering", currentPeakMetering);
+            double fullScale = 32767;
+            double peakAmplitude = recorder.getMaxAmplitude();
+            int peakDb = peakAmplitude == 0 ? -160 : (int)(35 * Math.log10(peakAmplitude / fullScale));
+            body.putInt("currentPeakMetering", peakDb);
           }
 
           sendEvent("recordingProgress", body);
