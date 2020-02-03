@@ -329,7 +329,7 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
           sendEvent("recordingProgress", body);
         }
       }
-    }, 0, 1000);
+    }, 0, 250);
   }
 
   private void stopTimer(){
