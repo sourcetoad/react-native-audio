@@ -63,6 +63,7 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
   private StopWatch stopWatch;
   private boolean isMeteringEnabled = false;
   
+  private int lastPeak = 0;
   private boolean isPauseResumeCapable = false;
   private Method pauseMethod = null;
   private Method resumeMethod = null;
@@ -320,9 +321,13 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
           body.putDouble("currentTime", stopWatch.getTimeSeconds());
 
           if (isMeteringEnabled) {
-            double fullScale = 32767;
-            double peakAmplitude = recorder.getMaxAmplitude();
-            int peakDb = peakAmplitude == 0 ? -160 : (int)(35 * Math.log10(peakAmplitude / fullScale));
+            // Value at which level will be reported as 0dB
+            // Max possible value received is 32767
+            int fullScale = 25000;
+            int peakAmplitude = recorder.getMaxAmplitude();
+            // Average with the last sample (if higher) to smooth level
+            lastPeak = peakAmplitude > lastPeak ? peakAmplitude : (peakAmplitude + lastPeak) / 2;
+            int peakDb = lastPeak == 0 ? -160 : (int)(35 * Math.log10((double)lastPeak / (double)fullScale));
             body.putInt("currentPeakMetering", peakDb);
           }
 
